@@ -9,6 +9,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -37,5 +39,15 @@ public class Upah {
 
     @Column(nullable = false)
     private LocalDateTime lastModified;
+
+    @PrePersist
+    public void onCreate() {
+        this.lastModified = LocalDateTime.now();
+    }
+
+    @PreUpdate 
+    public void onUpdate() {
+        this.lastModified = LocalDateTime.now();
+    }
 
 }
