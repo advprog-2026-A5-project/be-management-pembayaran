@@ -73,9 +73,8 @@ public class PayrollServiceImpl implements PayrollService {
     @Override
     @Transactional
     public Payroll updateStatus(PayrollUpdateStatusRequestDTO request) {
-        validatePayrollExists(request.getId());
+        validatePayroll(request.getId());
         Payroll payroll = getById(request.getId());
-        checkStatusPending(payroll.getStatus());
         payroll.setStatus(request.getStatus());
         payroll.setAlasanPenolakan(request.getAlasanPenolakan());
         return update(payroll);
@@ -105,14 +104,10 @@ public class PayrollServiceImpl implements PayrollService {
         }
     }
 
-    private void validatePayrollExists(Long id) {
-        if (id == null || !payrollRepository.existsById(id)) {
-            throw new IllegalArgumentException("Payroll tidak ditemukan");
-        }
-    }
-
-    private void checkStatusPending(PayrollStatus status) {
-        if (status != PayrollStatus.PENDING) {
+    private void validatePayroll(Long id) {
+        Payroll payroll = payrollRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Payroll tidak ditemukan"));
+        if (payroll.getStatus() != PayrollStatus.PENDING) {
             throw new IllegalArgumentException("Status tidak boleh diubah lagi");
         }
     }
