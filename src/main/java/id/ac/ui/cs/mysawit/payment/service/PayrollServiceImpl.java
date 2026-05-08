@@ -19,10 +19,12 @@ public class PayrollServiceImpl implements PayrollService {
 
     private final PayrollRepository payrollRepository;
     private final UpahRepository upahRepository;
+    private final WalletService walletService;
 
-    public PayrollServiceImpl(PayrollRepository payrollRepository, UpahRepository upahRepository) {
+    public PayrollServiceImpl(PayrollRepository payrollRepository, UpahRepository upahRepository, WalletService walletService) {
         this.payrollRepository = payrollRepository;
         this.upahRepository = upahRepository;
+        this.walletService = walletService;
     }
 
     @Override
@@ -67,9 +69,12 @@ public class PayrollServiceImpl implements PayrollService {
         Payroll payroll = new Payroll();
         payroll.setUserId(request.getUserId());
         payroll.setAmount(amount);
+        payroll.setUpahPerKg(upah.getUpahPerKg());
         return create(payroll);
     }
 
+    // TODO: Check saldo admin validation
+    // TODO: Fix amount type
     @Override
     @Transactional
     public Payroll updateStatus(PayrollUpdateStatusRequestDTO request) {
@@ -77,6 +82,9 @@ public class PayrollServiceImpl implements PayrollService {
         Payroll payroll = getById(request.getId());
         payroll.setStatus(request.getStatus());
         payroll.setAlasanPenolakan(request.getAlasanPenolakan());
+        if (payroll.getStatus() == PayrollStatus.ACCEPTED) {
+            walletService.addBalance(request.getId(), (long) payroll.getAmount());
+        }
         return update(payroll);
     }
 
