@@ -1,0 +1,80 @@
+package id.ac.ui.cs.mysawit.payment.service;
+
+import id.ac.ui.cs.mysawit.payment.model.Wallet;
+import id.ac.ui.cs.mysawit.payment.repository.WalletRepository;
+import jakarta.annotation.PostConstruct;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+// TODO: Payment Gateway
+@Service
+public class WalletServiceImpl implements WalletService {
+
+    private final WalletRepository walletRepository;
+    private Wallet adminWallet; // TODO: Tunggu user implementation
+    private Long adminId = 100l; 
+    private Long adminInitialSaldo;
+
+    public WalletServiceImpl(WalletRepository walletRepository) {
+        this.walletRepository = walletRepository;
+    }
+
+    @Override
+    @Transactional
+    public Wallet getOrCreate(Long userId) {
+        validateUserId(userId);
+        return walletRepository.findByUserId(userId)
+                .orElseGet(() -> walletRepository.save(createWallet(userId)));
+    }
+
+    @Override
+    @Transactional
+    public Wallet addBalance(Long userId, Long amount) {
+        validateAmount(amount);
+        Wallet wallet = getOrCreate(userId);
+        wallet.setBalance(wallet.getBalance() + amount);
+        adminWallet.setBalance(adminWallet.getBalance() - amount);
+        walletRepository.save(adminWallet);
+        return walletRepository.save(wallet);
+    }
+
+    @Override
+    @Transactional
+    public Wallet topUp(Long amount) {
+        return addBalance(adminId, amount);
+    }
+
+    @Override
+    @Transactional
+    public Wallet getAdminWallet() {
+        return adminWallet;
+    }
+
+    @PostConstruct
+    private void createAdminWallet() {
+        adminWallet = addBalance(adminId, adminInitialSaldo);
+    }
+
+    private Wallet createWallet(Long userId) {
+        Wallet wallet = new Wallet();
+        wallet.setUserId(userId);
+        wallet.setBalance(0l);
+        return wallet;
+    }
+
+    private void validateUserId(Long userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("UserId tidak boleh kosong");
+        }
+    }
+
+    private void validateAmount(double amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Amount harus lebih dari 0");
+        }
+        if (amount > adminWallet.getBalance()) {
+            throw new IllegalArgumentException("Saldo Admin tidak cukup");
+        }
+    }
+}
