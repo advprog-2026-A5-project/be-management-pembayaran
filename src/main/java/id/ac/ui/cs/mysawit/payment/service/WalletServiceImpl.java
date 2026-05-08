@@ -13,8 +13,8 @@ public class WalletServiceImpl implements WalletService {
 
     private final WalletRepository walletRepository;
     private Wallet adminWallet; // TODO: Tunggu user implementation
-    private Long adminId = 100l; 
-    private Long adminInitialSaldo;
+    private Long adminId = 100L;
+    private Long adminInitialSaldo = 0L;
 
     public WalletServiceImpl(WalletRepository walletRepository) {
         this.walletRepository = walletRepository;
@@ -34,8 +34,10 @@ public class WalletServiceImpl implements WalletService {
         validateAmount(amount);
         Wallet wallet = getOrCreate(userId);
         wallet.setBalance(wallet.getBalance() + amount);
-        adminWallet.setBalance(adminWallet.getBalance() - amount);
-        walletRepository.save(adminWallet);
+        if (adminWallet != null && !userId.equals(adminId)) {
+            adminWallet.setBalance(adminWallet.getBalance() - amount);
+            walletRepository.save(adminWallet);
+        }
         return walletRepository.save(wallet);
     }
 
@@ -53,13 +55,21 @@ public class WalletServiceImpl implements WalletService {
 
     @PostConstruct
     private void createAdminWallet() {
-        adminWallet = addBalance(adminId, adminInitialSaldo);
+        adminWallet = walletRepository.findByUserId(adminId)
+                .orElseGet(() -> walletRepository.save(createWalletWithBalance(adminId, adminInitialSaldo)));
     }
 
     private Wallet createWallet(Long userId) {
         Wallet wallet = new Wallet();
         wallet.setUserId(userId);
-        wallet.setBalance(0l);
+        wallet.setBalance(0L);
+        return wallet;
+    }
+
+    private Wallet createWalletWithBalance(Long userId, Long balance) {
+        Wallet wallet = new Wallet();
+        wallet.setUserId(userId);
+        wallet.setBalance(balance == null ? 0L : balance);
         return wallet;
     }
 
@@ -73,7 +83,7 @@ public class WalletServiceImpl implements WalletService {
         if (amount <= 0) {
             throw new IllegalArgumentException("Amount harus lebih dari 0");
         }
-        if (amount > adminWallet.getBalance()) {
+        if (adminWallet != null && amount > adminWallet.getBalance()) {
             throw new IllegalArgumentException("Saldo Admin tidak cukup");
         }
     }
