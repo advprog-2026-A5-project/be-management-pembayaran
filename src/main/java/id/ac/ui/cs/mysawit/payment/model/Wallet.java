@@ -27,5 +27,5 @@ public class Wallet {
     private Long userId;
 
     @Column(nullable = false)
-    private Long balance;
+    private Double balance;
 }

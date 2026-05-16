@@ -7,5 +7,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class WalletResponseDTO {
     private Long userId;
-    private Long balance;
+    private Double balance;
 }

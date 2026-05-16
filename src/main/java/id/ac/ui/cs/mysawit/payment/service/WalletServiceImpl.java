@@ -30,7 +30,7 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     @Transactional
-    public Wallet addBalance(Long userId, Long amount) {
+    public Wallet addBalance(Long userId, Double amount) {
         validateAmount(amount);
         Wallet wallet = getOrCreate(userId);
         wallet.setBalance(wallet.getBalance() + amount);
@@ -43,7 +43,7 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     @Transactional
-    public Wallet topUp(Long amount) {
+    public Wallet topUp(Double amount) {
         return addBalance(adminId, amount);
     }
 
@@ -62,14 +62,14 @@ public class WalletServiceImpl implements WalletService {
     private Wallet createWallet(Long userId) {
         Wallet wallet = new Wallet();
         wallet.setUserId(userId);
-        wallet.setBalance(0L);
+        wallet.setBalance(0D);
         return wallet;
     }
 
     private Wallet createWalletWithBalance(Long userId, Long balance) {
         Wallet wallet = new Wallet();
         wallet.setUserId(userId);
-        wallet.setBalance(balance == null ? 0L : balance);
+        wallet.setBalance(balance == null ? 0D : balance);
         return wallet;
     }
 

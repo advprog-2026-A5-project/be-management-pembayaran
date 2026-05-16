@@ -83,7 +83,7 @@ public class PayrollServiceImpl implements PayrollService {
         payroll.setStatus(request.getStatus());
         payroll.setAlasanPenolakan(request.getAlasanPenolakan());
         if (payroll.getStatus() == PayrollStatus.ACCEPTED) {
-            walletService.addBalance(request.getId(), (long) payroll.getAmount());
+            walletService.addBalance(request.getId(), payroll.getAmount());
         }
         return update(payroll);
     }

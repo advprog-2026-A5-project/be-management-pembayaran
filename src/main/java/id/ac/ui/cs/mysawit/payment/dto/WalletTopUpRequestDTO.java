@@ -8,5 +8,5 @@ import lombok.Data;
 public class WalletTopUpRequestDTO {
     @NotNull
     @Positive
-    private Long amount;
+    private Double amount;
 }

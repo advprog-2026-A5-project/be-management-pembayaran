@@ -4,7 +4,7 @@ import id.ac.ui.cs.mysawit.payment.model.Wallet;
 
 public interface WalletService {
     Wallet getOrCreate(Long userId);
-    Wallet addBalance(Long userId, Long balance);
-    Wallet topUp(Long balance);
+    Wallet addBalance(Long userId, Double balance);
+    Wallet topUp(Double balance);
     Wallet getAdminWallet();
 }
