@@ -21,8 +21,8 @@ public class UpahServiceImpl implements UpahService {
     }
 
     @PostConstruct
-    public void ensureRolesExist() {
-        Arrays.stream(UpahRole.values()).forEach(this::ensureRoleExists);
+    public void initiateUpah() {
+        Arrays.stream(UpahRole.values()).forEach(this::initiateUpah);
     }
 
     @Override
@@ -40,7 +40,7 @@ public class UpahServiceImpl implements UpahService {
         return upahRepository.save(existing);
     }
 
-    private void ensureRoleExists(UpahRole role) {
+    private void initiateUpah(UpahRole role) {
         if (upahRepository.findByRole(role).isEmpty()) {
             Upah initial = new Upah();
             initial.setRole(role);

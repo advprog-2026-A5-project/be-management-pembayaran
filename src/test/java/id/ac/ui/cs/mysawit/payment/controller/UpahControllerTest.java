@@ -68,4 +68,22 @@ class UpahControllerTest {
                 .andExpect(jsonPath("$.role").value("SUPIR"))
                 .andExpect(jsonPath("$.upahPerKg").value(1200.0));
     }
+
+    @Test
+    void update_updatesWhenNotAdmin() throws Exception {
+        mockMvc.perform(put("/api/upah")
+                        .header("X-User-Role", "BURUH")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"role\":\"SUPIR\",\"upahPerKg\":100.0}"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void update_updatesRoleNegativeValue() throws Exception {
+        mockMvc.perform(put("/api/upah")
+                        .header("X-User-Role", "ADMIN")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"role\":\"SUPIR\",\"upahPerKg\":-100.0}"))
+                .andExpect(status().isBadRequest());
+    }
 }

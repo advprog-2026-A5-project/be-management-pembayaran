@@ -11,6 +11,7 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
 class UpahServiceImplTest {
@@ -48,5 +49,36 @@ class UpahServiceImplTest {
         Upah updated = upahService.update(request);
 
         assertEquals(2.5, updated.getUpahPerKg());
+    }
+
+    @Test 
+    void updateWhileRolesIsEmpty() {
+        UpahRequestDTO request = new UpahRequestDTO();
+        request.setRole(UpahRole.MANDOR);
+        request.setUpahPerKg(2.5);
+
+        assertThrows(IllegalArgumentException.class, () -> upahService.update(request));
+    }
+
+    @Test
+    void getAllWhileEmpty() {
+        assertEquals(0, upahService.getAll().size());
+    }
+
+    @Test
+    void getAllWhileFull() {
+        upahService.initiateUpah();
+        assertEquals(3, upahService.getAll().size());
+    }
+
+    @Test
+    void iniateUpahRoleAlreadyExist() {
+        Upah existing = new Upah();
+        existing.setRole(UpahRole.MANDOR);
+        existing.setUpahPerKg(1.0);
+        upahRepository.saveAndFlush(existing);
+        
+        upahService.initiateUpah();
+        assertTrue(upahService.getAll().contains(existing));
     }
 }

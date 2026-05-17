@@ -14,8 +14,6 @@ import java.util.List;
 @RequestMapping("/api/upah")
 public class UpahController {
 
-    private static final String ROLE_ADMIN = "ADMIN";
-
     private final UpahService upahService;
 
     public UpahController(UpahService upahService) {
@@ -25,13 +23,11 @@ public class UpahController {
     @GetMapping
     public ResponseEntity<?> get(@RequestHeader("X-User-Role") String userRole) {
         try {
-            ensureRole(userRole, ROLE_ADMIN);
+            roleIsAdmin(userRole);
             List<UpahResponseDTO> responses = upahService.getAll().stream()
                     .map(this::toResponse)
                     .toList();
             return ResponseEntity.ok(responses);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
         } catch (SecurityException e) {
             return ResponseEntity.status(403).body(e.getMessage());
         }
@@ -42,11 +38,9 @@ public class UpahController {
             @RequestHeader("X-User-Role") String userRole,
             @Valid @RequestBody UpahRequestDTO request) {
         try {
-            ensureRole(userRole, ROLE_ADMIN);
+            roleIsAdmin(userRole);
             Upah updated = upahService.update(request);
             return ResponseEntity.ok(toResponse(updated));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (SecurityException e) {
             return ResponseEntity.status(403).body(e.getMessage());
         }
@@ -59,13 +53,9 @@ public class UpahController {
         );
     }
 
-    private void ensureRole(String actualRole, String expectedRole) {
-        if (!isRole(actualRole, expectedRole)) {
-            throw new SecurityException("Only " + expectedRole + " can access this endpoint");
+    private void roleIsAdmin(String role) {
+        if (!role.equalsIgnoreCase("ADMIN")) {
+            throw new SecurityException("Only admins can access this endpoint");
         }
-    }
-
-    private boolean isRole(String actualRole, String expectedRole) {
-        return actualRole != null && actualRole.equalsIgnoreCase(expectedRole);
     }
 }
