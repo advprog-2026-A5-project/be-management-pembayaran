@@ -33,7 +33,7 @@ jobs:
 
     - name: Deploy to Koyeb
       run: |
-        koyeb service update lesser-philippine/be-management-pembayaran \
+        koyeb service update "lesser-philippine/be-management-pembayaran" \
           --git-branch main \
           --env SPRING_DATASOURCE_URL="${{ secrets.SUPABASE_DB_URL }}" \
           --env SPRING_DATASOURCE_PASSWORD="${{ secrets.SUPABASE_DB_PASSWORD }}" \
