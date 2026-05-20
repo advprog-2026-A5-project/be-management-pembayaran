@@ -106,7 +106,25 @@ class PayrollServiceImplTest {
         Payroll updated = payrollService.updateStatus(request);
 
         assertEquals(PayrollStatus.ACCEPTED, updated.getStatus());
-        verify(walletService).addBalance(eq(payroll.getId()), eq(500.0));
+        verify(walletService).addBalance(eq(payroll.getUserId()), eq(500.0));
+    }
+
+    @Test
+    void updateStatus_rejectRequiresReason() {
+        Payroll payroll = new Payroll();
+        payroll.setUserId(10L);
+        payroll.setAmount(500.0);
+        payroll.setStatus(PayrollStatus.PENDING);
+        payroll.setAlasanPenolakan("");
+        payroll.setUpahPerKg(1000.0);
+        payrollRepository.saveAndFlush(payroll);
+
+        PayrollUpdateStatusRequestDTO request = new PayrollUpdateStatusRequestDTO();
+        request.setId(payroll.getId());
+        request.setStatus(PayrollStatus.REJECTED);
+        request.setAlasanPenolakan(" ");
+
+        assertThrows(IllegalArgumentException.class, () -> payrollService.updateStatus(request));
     }
 
     @Test
