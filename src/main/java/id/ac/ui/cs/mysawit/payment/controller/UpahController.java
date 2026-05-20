@@ -41,6 +41,8 @@ public class UpahController {
             roleIsAdmin(userRole);
             Upah updated = upahService.update(request);
             return ResponseEntity.ok(toResponse(updated));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (SecurityException e) {
             return ResponseEntity.status(403).body(e.getMessage());
         }

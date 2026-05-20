@@ -47,11 +47,7 @@ public class PayrollServiceImpl implements PayrollService {
 
     @Override
     public List<Payroll> getAllById(Long userId) {
-        List<Payroll> payrolls = payrollRepository.findByUserId(userId);
-        if (payrolls.isEmpty()) {
-            throw new IllegalArgumentException("Payroll untuk user tidak ditemukan");
-        }
-        return payrolls;
+        return payrollRepository.findByUserId(userId);
     }
 
     @Override
@@ -79,11 +75,12 @@ public class PayrollServiceImpl implements PayrollService {
     @Transactional
     public Payroll updateStatus(PayrollUpdateStatusRequestDTO request) {
         validatePayroll(request.getId());
+        validateUpdateStatus(request);
         Payroll payroll = getById(request.getId());
         payroll.setStatus(request.getStatus());
         payroll.setAlasanPenolakan(request.getAlasanPenolakan());
         if (payroll.getStatus() == PayrollStatus.ACCEPTED) {
-            walletService.addBalance(request.getId(), payroll.getAmount());
+            walletService.addBalance(payroll.getUserId(), payroll.getAmount());
         }
         return update(payroll);
     }
@@ -117,6 +114,15 @@ public class PayrollServiceImpl implements PayrollService {
                 .orElseThrow(() -> new IllegalArgumentException("Payroll tidak ditemukan"));
         if (payroll.getStatus() != PayrollStatus.PENDING) {
             throw new IllegalArgumentException("Status tidak boleh diubah lagi");
+        }
+    }
+
+    private void validateUpdateStatus(PayrollUpdateStatusRequestDTO request) {
+        if (request.getStatus() == PayrollStatus.REJECTED) {
+            String alasan = request.getAlasanPenolakan();
+            if (alasan == null || alasan.trim().isEmpty()) {
+                throw new IllegalArgumentException("Alasan penolakan wajib diisi");
+            }
         }
     }
 }

@@ -31,7 +31,8 @@ public class WalletServiceImpl implements WalletService {
     @Override
     @Transactional
     public Wallet addBalance(Long userId, Double amount) {
-        validateAmount(amount);
+        boolean checkAdminBalance = adminWallet != null && !userId.equals(adminId);
+        validateAmount(amount, checkAdminBalance);
         Wallet wallet = getOrCreate(userId);
         wallet.setBalance(wallet.getBalance() + amount);
         if (adminWallet != null && !userId.equals(adminId)) {
@@ -79,11 +80,11 @@ public class WalletServiceImpl implements WalletService {
         }
     }
 
-    private void validateAmount(double amount) {
+    private void validateAmount(double amount, boolean checkAdminBalance) {
         if (amount <= 0) {
             throw new IllegalArgumentException("Amount harus lebih dari 0");
         }
-        if (adminWallet != null && amount > adminWallet.getBalance()) {
+        if (checkAdminBalance && adminWallet != null && amount > adminWallet.getBalance()) {
             throw new IllegalArgumentException("Saldo Admin tidak cukup");
         }
     }
